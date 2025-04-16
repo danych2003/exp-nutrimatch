@@ -10,7 +10,7 @@ import type {ViewProduct} from "@/model/ViewProduct.ts";
 import ProductPopup from "@/components/ProductPopup.vue";
 import HeaderUnauthorized from "@/components/HeaderUnauthorized.vue";
 import useVuelidate from "@vuelidate/core";
-import {helpers, minLength, required} from "@vuelidate/validators";
+import {email, helpers, minLength, required} from "@vuelidate/validators";
 import {Md5} from "ts-md5";
 
 const productPopupState = reactive({
@@ -182,8 +182,8 @@ const submitLoginForm = async () => {
   if (v$Login.value.$invalid) {
     console.log(v$Login.value.$errors);
   } else {
-    alert('Form is valid! Submitting...');
     LoginStatusProp.LoginStatus = await login();
+    await fetchItems();
   }
 };
 const submitRegistrationForm = async () => {
@@ -192,10 +192,40 @@ const submitRegistrationForm = async () => {
   if (v$Register.value.$invalid) {
     console.log(v$Register.value.$errors);
   } else {
-    alert('Form is valid! Submitting...');
-    // LoginStatusProp.LoginStatus = await login();
+    await register();
   }
 };
+
+const register = async () => {
+  const password = Md5.hashStr(form.registrationForm.password)
+  console.log(password);
+  let data: { username: string; passwordHash: string; email?: string; firstName?: string; lastName?: string } = {
+    username: form.registrationForm.username,
+    passwordHash: password,
+  };
+
+  if(form.registrationForm.email !== '') {
+    data.email = form.registrationForm.email;
+  }
+
+  if(form.registrationForm.lastName !== '') {
+    data.lastName = form.registrationForm.lastName;
+  }
+
+  if(form.registrationForm.firstName !== '') {
+    data.firstName = form.registrationForm.firstName;
+  }
+
+  const response = await axios.post(`http://localhost:8443/api/register`, data);
+  console.log(response.data);
+
+  if (response.status === 200) {
+    alert("please login!");
+    LoginStatusProp.PageState = 'login';
+    return true;
+  }
+  return false;
+}
 
 const login = async () => {
   const password = Md5.hashStr(form.loginForm.password)
@@ -247,13 +277,24 @@ function isLoggedIn() {
 function changeAuthPageState() {
   if(LoginStatusProp.PageState === 'login') {
     LoginStatusProp.PageState = 'registration';
+    form.loginForm.password = '';
+    form.loginForm.username = '';
   } else {
     LoginStatusProp.PageState = 'login';
+    form.registrationForm.password = '';
+    form.registrationForm.username = '';
+    form.registrationForm.lastName  = '';
+    form.registrationForm.firstName  = '';
+    form.registrationForm.email  = '';
   }
 }
-onMounted(fetchItems)
+
+if(LoginStatusProp.LoginStatus) {
+  onMounted(fetchItems())
+}
+
 watch(filters, fetchItems)
-watch(isLoggedIn, fetchItems)
+
 </script>
 
 <template>
@@ -291,7 +332,7 @@ watch(isLoggedIn, fetchItems)
         <div class="p-5 flex justify-center">
           <div class="block">
           <h2 class="font-[Karla] font-extrabold text-3xl pb-6">Login in</h2>
-            <div v-if="v$Login?.$invalid && submitPressed" class="bg-red-600 p-4 mb-3 text-white rounded-xl">
+            <div v-if="v$Login?.$error && submitPressed" class="bg-red-600 p-4 mb-3 text-white rounded-xl">
               <div v-for="(error, field) in v$Login?.$errors" :key="field" class="flex justify-center">
                 <p>{{ error.$message }}</p>
               </div>
@@ -321,7 +362,7 @@ watch(isLoggedIn, fetchItems)
         <div class="p-5 flex justify-center">
           <div class="flex flex-col gap-y-2">
             <h2 class="font-[Karla] font-extrabold text-3xl pb-6">Registration</h2>
-            <div v-if="v$Login?.$invalid && submitPressed" class="bg-red-600 p-4 mb-3 text-white rounded-xl">
+            <div v-if="v$Register?.$error && submitPressed" class="bg-red-600 p-4 mb-3 text-white rounded-xl">
               <div v-for="(error, field) in v$Register?.$errors" :key="field" class="flex justify-center">
                 <p>{{ error.$message }}</p>
               </div>
