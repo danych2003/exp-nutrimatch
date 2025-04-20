@@ -75,7 +75,6 @@ const submitRegistrationForm = async () => {
   props.loginStatusProp.SubmitPressed = true;
   await v$Register.value.$validate();
   if (v$Register.value.$invalid) {
-    console.log(v$Register.value.$errors);
   } else {
     const response = await register();
     if (response.success) {

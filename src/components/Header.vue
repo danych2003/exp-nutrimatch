@@ -1,5 +1,22 @@
+<script setup lang="ts">
+  import router from "@/router/Router.ts";
+
+  interface HeaderProps {
+    pageInfo: {
+      page: string
+    },
+  }
+
+  const headerProps = defineProps<HeaderProps>()
+
+  function changeAppScreenState(page: string) {
+    router.push(`/${page}`);
+  }
+
+</script>
+
 <template>
-  <header class="flex justify-between border-b border-b-gray-300 px-8 p-19 pb-9">
+  <div class="flex justify-between border-b border-b-gray-300 px-8 p-19 pb-9">
 
     <div class="flex items-center">
       <img src="../assets/logo.svg" class="w-12 mr-5" alt="logo">
@@ -10,18 +27,18 @@
     </div>
 
     <ul class="flex items-center gap-10 font-[Jua] text-gray-400">
-      <li class="flex gap-3 hover:text-black cursor-pointer">
+      <li @click="changeAppScreenState('recipes')" class="flex gap-3 hover:text-black cursor-pointer">
         <img src="../assets/icons/recipes-icon.svg" alt="icon">
         Recipes
       </li>
-      <li class="flex gap-3 hover:text-black cursor-pointer">
+      <li @click="changeAppScreenState('products')" class="flex gap-3 hover:text-black cursor-pointer">
         <img src="../assets/icons/products-icon.svg" alt="icon">
         Products
       </li>
-      <li class="flex gap-3 hover:text-black cursor-pointer">
+      <li @click="changeAppScreenState('profile')" class="flex gap-3 hover:text-black cursor-pointer">
         <img src="../assets/icons/profile-icon.svg" alt="icon">
         Profile
       </li>
     </ul>
-  </header>
+  </div>
 </template>

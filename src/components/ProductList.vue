@@ -2,7 +2,7 @@
 import Product from "@/components/Product.vue";
 import type {ViewProduct} from "@/model/ViewProduct.ts";
 
-interface Products {
+interface ProductListProps {
   products: ViewProduct[];
   filters: {
     sortBy: string,
@@ -14,20 +14,46 @@ interface Products {
       productId: string,
     }
   };
+  availablePageNumber: number;
 }
 
-const products = defineProps<Products>();
+const productListProps = defineProps<ProductListProps>();
 
 const onChangeSearchInput = () => {
   const target = document.querySelector('input[type="text"]') as HTMLInputElement;
-  products.filters.searchQuery = target.value;
-  products.filters.currentPage = 1;
-  console.log(products.filters.searchQuery);
+  productListProps.filters.searchQuery = target.value;
+  productListProps.filters.currentPage = 1;
 }
 
 function setId(id: string) {
-  products.productPopupState.product.productId = id;
+  productListProps.productPopupState.product.productId = id;
 }
+
+function getPageRange(currentPage: number, available: number): number[] {
+  if (currentPage < 0 || available <= 0) {
+    return [1];
+  }
+
+  const maxPagesToShow = 5;
+  let startPage = Math.max(currentPage - Math.floor(maxPagesToShow / 2), 1);
+  let endPage = Math.min(startPage + maxPagesToShow - 1, available);
+
+  if (endPage - startPage < maxPagesToShow - 1) {
+    startPage = Math.max(endPage - maxPagesToShow + 1, 1);
+  }
+
+  const pageRange = [];
+  for (let i = startPage; i <= endPage; i++) {
+    pageRange.push(i);
+  }
+
+  return pageRange;
+}
+
+function setCurrentPage(page: number) {
+  productListProps.filters.currentPage = page;
+}
+
 
 </script>
 
@@ -67,10 +93,20 @@ function setId(id: string) {
     <div class="space-y-2">
       <Product
           @click="setId(product.id)"
-          v-for="product in products.products"
+          v-for="product in productListProps.products"
           :name="product.name || ''"
           :type="product.type || ''"
           :allergens="product.allergens"/>
     </div>
+  </div>
+  <div class="py-5 flex justify-center">
+    <ul class="flex gap-4">
+      <li v-for="page in getPageRange(filters.currentPage, productListProps.availablePageNumber)"
+          :key="page"
+          :class="['cursor-pointer', page === filters.currentPage ? 'font-bold' : '']"
+          @click="setCurrentPage(page)">
+        {{ page }}
+      </li>
+    </ul>
   </div>
 </template>

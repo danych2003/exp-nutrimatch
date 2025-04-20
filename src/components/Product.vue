@@ -8,7 +8,6 @@ interface Product {
 
 const props = defineProps<Product>()
 
-console.log(props)
 </script>
 
 <template>

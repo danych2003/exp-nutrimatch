@@ -56,7 +56,6 @@ const submitLoginForm = async () => {
   props.loginStatusProp.SubmitPressed = true;
   await v$Login.value.$validate();
   if (v$Login.value.$invalid) {
-    console.log(v$Login.value.$errors);
   } else {
     const response = await login();
     if (response.success) {
