@@ -10,8 +10,9 @@ import type {ViewProduct} from "@/model/ViewProduct.ts";
 import ProductPopup from "@/components/ProductPopup.vue";
 import HeaderUnauthorized from "@/components/HeaderUnauthorized.vue";
 import useVuelidate from "@vuelidate/core";
-import {email, helpers, minLength, required} from "@vuelidate/validators";
-import {Md5} from "ts-md5";
+import {email, helpers, maxLength, minLength, required} from "@vuelidate/validators";
+import LoginPage from "@/components/LoginPage.vue";
+import RegistatrationPage from "@/components/RegistatrationPage.vue";
 
 const productPopupState = reactive({
   product: {
@@ -42,6 +43,8 @@ const availablePageNumber = ref(0)
 const LoginStatusProp = reactive({
     LoginStatus: false,
     PageState: "login",
+    SubmitPressed: false,
+    token: "",
 });
 
 const filters = reactive({
@@ -50,8 +53,6 @@ const filters = reactive({
   currentPage: 1,
 })
 
-const token = ref("")
-
 const fetchItems = async () => {
   try {
     const params = {
@@ -59,7 +60,7 @@ const fetchItems = async () => {
       current_page: filters.currentPage - 1,
     };
     const headers = {
-      Authorization: `Bearer ${token.value}`,
+      Authorization: `Bearer ${LoginStatusProp.token}`,
     };
 
     const response = await axios.get(`http://localhost:8443/api/product`,
@@ -122,129 +123,12 @@ const form = reactive({
   }
 });
 
-const containsNumber = helpers.withMessage(
-    'Password must contain at least one number.',
-    (value: string) =>
-      /\d/.test(value)
-);
-
-const validateEmail = helpers.withMessage(
-    'Incorrect email address.',
-    (value: string) =>
-        /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(value)
-);
-
-const passwordsShouldBeSimilar = helpers.withMessage(
-    'Passwords are not match.',
-    (value: string) =>
-        value === form.registrationForm.confirmPassword
-);
-const rulesLogin = {
-  username: {
-    required,
-    minLength: minLength(5),
-  },
-  password: {
-    required,
-    minLength: minLength(7),
-    containsNumber,
-  },
-};
-
-const rulesRegistration = {
-  email: {
-    validateEmail
-  },
-  username: {
-    required,
-    minLength: minLength(5),
-  },
-  password: {
-    required,
-    minLength: minLength(7),
-    containsNumber,
-    passwordsShouldBeSimilar,
-  },
-};
-
-
-const v$Login = useVuelidate(rulesLogin, form.loginForm);
-const v$Register = useVuelidate(rulesRegistration, form.registrationForm);
-
 function setCurrentPage(page: number) {
   filters.currentPage = page;
   console.log(filters.currentPage)
 }
-const submitPressed = ref(false);
-const submitLoginForm = async () => {
-  submitPressed.value = true;
-  await v$Login.value.$validate();
-  if (v$Login.value.$invalid) {
-    console.log(v$Login.value.$errors);
-  } else {
-    LoginStatusProp.LoginStatus = await login();
-    await fetchItems();
-  }
-};
-const submitRegistrationForm = async () => {
-  submitPressed.value = true;
-  await v$Register.value.$validate();
-  if (v$Register.value.$invalid) {
-    console.log(v$Register.value.$errors);
-  } else {
-    await register();
-  }
-};
 
-const register = async () => {
-  const password = Md5.hashStr(form.registrationForm.password)
-  console.log(password);
-  let data: { username: string; passwordHash: string; email?: string; firstName?: string; lastName?: string } = {
-    username: form.registrationForm.username,
-    passwordHash: password,
-  };
 
-  if(form.registrationForm.email !== '') {
-    data.email = form.registrationForm.email;
-  }
-
-  if(form.registrationForm.lastName !== '') {
-    data.lastName = form.registrationForm.lastName;
-  }
-
-  if(form.registrationForm.firstName !== '') {
-    data.firstName = form.registrationForm.firstName;
-  }
-
-  const response = await axios.post(`http://localhost:8443/api/register`, data);
-  console.log(response.data);
-
-  if (response.status === 200) {
-    alert("please login!");
-    LoginStatusProp.PageState = 'login';
-    return true;
-  }
-  return false;
-}
-
-const login = async () => {
-  const password = Md5.hashStr(form.loginForm.password)
-  console.log(password);
-  const data = {
-    username: form.loginForm.username,
-    passwordHash: password,
-  };
-
-  const response = await axios.post(`http://localhost:8443/api/login`, data);
-  console.log(response.data);
-
-  if (response.status === 200) {
-    document.cookie = "token=" + response.data;
-    token.value = response.data;
-    return true;
-  }
-  return false;
-}
 
 function getCookie(cname: string) {
   let name = cname + "=";
@@ -266,12 +150,9 @@ if(LoginStatusProp.LoginStatus) {
   onMounted(fetchItems)
 } else {
   if(getCookie("token") !== "") {
-    token.value = getCookie("token");
+    LoginStatusProp.token = getCookie("token");
     LoginStatusProp.LoginStatus = true;
   }
-}
-function isLoggedIn() {
-
 }
 
 function changeAuthPageState() {
@@ -328,90 +209,16 @@ watch(filters, fetchItems)
   <div v-if="!LoginStatusProp.LoginStatus">
     <div class="w-1/2 bg-white m-auto rounded-3xl shadow-2xl mt-5">
       <HeaderUnauthorized/>
-      <div v-if="LoginStatusProp.PageState === 'login'">
-        <div class="p-5 flex justify-center">
-          <div class="block">
-          <h2 class="font-[Karla] font-extrabold text-3xl pb-6">Login in</h2>
-            <div v-if="v$Login?.$error && submitPressed" class="bg-red-600 p-4 mb-3 text-white rounded-xl">
-              <div v-for="(error, field) in v$Login?.$errors" :key="field" class="flex justify-center">
-                <p>{{ error.$message }}</p>
-              </div>
-            </div>
-          <input
-              v-model="form.loginForm.username"
-              class="flex font-[Karla] text-xl w-70 font-light border border-gray-300 hover:border-gray-500 rounded-md py-2 pl-3 pr-4 outline-none"
-              type="text"
-              placeholder="Username"
-              autocomplete="off">
-          <input
-              v-model="form.loginForm.password"
-              class="flex font-[Karla] text-xl w-70 font-light border border-gray-300 hover:border-gray-500 rounded-md mt-3 py-2 pl-3 pr-4 outline-none"
-              type="password"
-              placeholder="Password"
-              autocomplete="off">
-            <button
-                @click="submitLoginForm"
-                class="bg-orange-400 mt-5 ml-19 hover:bg-orange-500 text-white font-bold py-2 px-10 border border-orange-500 rounded cursor-pointer">
-              Submit
-            </button>
-            <div @click="changeAuthPageState" class="flex justify-center font-[Karla] font-light text-blue-500 cursor-pointer hover:text-blue-950">Create an account?</div>
-          </div>
-        </div>
-      </div>
-      <div v-if="LoginStatusProp.PageState === 'registration'">
-        <div class="p-5 flex justify-center">
-          <div class="flex flex-col gap-y-2">
-            <h2 class="font-[Karla] font-extrabold text-3xl pb-6">Registration</h2>
-            <div v-if="v$Register?.$error && submitPressed" class="bg-red-600 p-4 mb-3 text-white rounded-xl">
-              <div v-for="(error, field) in v$Register?.$errors" :key="field" class="flex justify-center">
-                <p>{{ error.$message }}</p>
-              </div>
-            </div>
-            <input
-                v-model="form.registrationForm.email"
-                class="flex font-[Karla] text-xl w-70 font-light border border-gray-300 hover:border-gray-500 rounded-md py-2 pl-3 pr-4 outline-none"
-                type="email"
-                placeholder="Email"
-                autocomplete="off">
-            <input
-                v-model="form.registrationForm.username"
-                class="flex font-[Karla] text-xl w-70 font-light border border-gray-300 hover:border-gray-500 rounded-md py-2 pl-3 pr-4 outline-none"
-                type="text"
-                placeholder="Username*"
-                autocomplete="off">
-            <input
-                v-model="form.registrationForm.firstName"
-                class="flex font-[Karla] text-xl w-70 font-light border border-gray-300 hover:border-gray-500 rounded-md py-2 pl-3 pr-4 outline-none"
-                type="text"
-                placeholder="First name"
-                autocomplete="off">
-            <input
-                v-model="form.registrationForm.lastName"
-                class="flex font-[Karla] text-xl w-70 font-light border border-gray-300 hover:border-gray-500 rounded-md py-2 pl-3 pr-4 outline-none"
-                type="text"
-                placeholder="Last name"
-                autocomplete="off">
-            <input
-                v-model="form.registrationForm.password"
-                class="flex font-[Karla] text-xl w-70 font-light border border-gray-300 hover:border-gray-500 rounded-md py-2 pl-3 pr-4 outline-none"
-                type="password"
-                placeholder="Password*"
-                autocomplete="off">
-            <input
-                v-model="form.registrationForm.confirmPassword"
-                class="flex font-[Karla] text-xl w-70 font-light border border-gray-300 hover:border-gray-500 rounded-md py-2 pl-3 pr-4 outline-none"
-                type="password"
-                placeholder="Confirm password*"
-                autocomplete="off">
-            <button
-                @click="submitRegistrationForm"
-                class="bg-orange-400 mt-5 hover:bg-orange-500 text-white font-bold py-2 px-10 border border-orange-500 rounded cursor-pointer">
-              Submit
-            </button>
-            <div @click="changeAuthPageState" class="flex justify-center font-[Karla] font-light text-blue-500 cursor-pointer hover:text-blue-950">Have an account?</div>
-          </div>
-        </div>
-      </div>
+      <LoginPage
+      :loginStatusProp="LoginStatusProp"
+      :form="form"
+      :fetchItems="fetchItems"
+      :changeAuthPageState="changeAuthPageState"/>
+      <RegistatrationPage
+          :loginStatusProp="LoginStatusProp"
+          :form="form"
+          :fetchItems="fetchItems"
+          :changeAuthPageState="changeAuthPageState"/>
     </div>
   </div>
 </template>
