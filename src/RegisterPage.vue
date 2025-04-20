@@ -1,38 +1,21 @@
 <script setup lang="ts">
 import {helpers, maxLength, minLength, required} from "@vuelidate/validators";
 import useVuelidate from "@vuelidate/core";
-import {type Reactive, ref} from "vue";
-import LoginPage from "@/components/LoginPage.vue";
-import type { Ref } from 'vue'
+import {reactive, type Reactive, ref} from "vue";
+import LoginPage from "@/LoginPage.vue";
+import type {Ref} from 'vue'
 import axios from "axios";
 import {parseError} from "@/utils/ErrorMapper.ts";
 import type {ErrorResponse} from "@/model/ErrorResponse.ts";
+import router, {changeAppScreenState} from "@/router/Router.ts";
+import HeaderUnauthorized from "@/components/HeaderUnauthorized.vue";
+import {isLoggedIn} from "@/utils/LoginHelper.ts";
 
-const props = defineProps<{
-  loginStatusProp: {
-    LoginStatus: boolean
-    PageState: string
-    SubmitPressed: boolean
-    token: string
-  }
-  form: {
-    loginForm: {
-      username: string,
-      password: string,
-    },
-    registrationForm: {
-      email: string,
-      username: string,
-      firstName: string,
-      lastName: string,
-      password: string,
-      confirmPassword: string,
-    }
-  }
-  fetchItems: () => Promise<any>
-  changeAuthPageState: () => void
-}>()
 const serverError = ref<ErrorResponse>();
+
+if(isLoggedIn()) {
+  changeAppScreenState("products");
+}
 
 const containsNumber = helpers.withMessage(
     'Password must contain at least one number.',
@@ -49,7 +32,7 @@ const validateEmail = helpers.withMessage(
 const passwordsShouldBeSimilar = helpers.withMessage(
     'Passwords are not match.',
     (value: string) =>
-        value === props.form.registrationForm.confirmPassword
+        value === form.registrationForm.confirmPassword
 );
 
 const rulesRegistration = {
@@ -69,38 +52,42 @@ const rulesRegistration = {
   },
 };
 
-const v$Register = useVuelidate(rulesRegistration, props.form.registrationForm);
+const loginStatusProp = reactive({
+  SubmitPressed: false,
+  token: "",
+  loginStatus: false,
+});
 
-const submitRegistrationForm = async () => {
-  props.loginStatusProp.SubmitPressed = true;
-  await v$Register.value.$validate();
-  if (v$Register.value.$invalid) {
-  } else {
-    const response = await register();
-    if (response.success) {
-      props.loginStatusProp.PageState = 'login';
-    } else if (response.statusCode === 400) {
-      serverError.value = response.message;
-    }
+const form = reactive({
+  registrationForm: {
+    email: '',
+    username: '',
+    firstName: '',
+    lastName: '',
+    password: '',
+    confirmPassword: '',
   }
-};
+});
+
+
+const v$Register = useVuelidate(rulesRegistration, form.registrationForm);
 
 const register = async () => {
   let data: { username: string; password: string; email?: string; firstName?: string; lastName?: string } = {
-    username: props.form.registrationForm.username,
-    password: props.form.registrationForm.password,
+    username: form.registrationForm.username,
+    password: form.registrationForm.password,
   };
 
-  if(props.form.registrationForm.email !== '') {
-    data.email = props.form.registrationForm.email;
+  if(form.registrationForm.email !== '') {
+    data.email = form.registrationForm.email;
   }
 
-  if(props.form.registrationForm.lastName !== '') {
-    data.lastName = props.form.registrationForm.lastName;
+  if(form.registrationForm.lastName !== '') {
+    data.lastName = form.registrationForm.lastName;
   }
 
-  if(props.form.registrationForm.firstName !== '') {
-    data.firstName = props.form.registrationForm.firstName;
+  if(form.registrationForm.firstName !== '') {
+    data.firstName = form.registrationForm.firstName;
   }
   try {
     const response = await axios.post(`http://localhost:8443/api/register`, data);
@@ -114,11 +101,26 @@ const register = async () => {
   }
 }
 
+const submitRegistrationForm = async () => {
+  loginStatusProp.SubmitPressed = true;
+  await v$Register.value.$validate();
+  if (v$Register.value.$invalid) {
+  } else {
+    const response = await register();
+    if (response.success) {
+      changeAppScreenState("login");
+    } else if (response.statusCode === 400) {
+      serverError.value = response.message;
+    }
+  }
+};
+
 
 </script>
 
 <template>
-  <div v-if="props.loginStatusProp.PageState === 'registration'">
+  <div class="w-1/2 bg-white m-auto rounded-3xl shadow-2xl mt-5">
+    <HeaderUnauthorized/>
     <div class="p-5 flex justify-center">
       <div class="flex flex-col gap-y-2">
         <h2 class="font-[Karla] font-extrabold text-3xl pb-6">Registration</h2>
@@ -168,7 +170,10 @@ const register = async () => {
             class="bg-orange-400 mt-5 hover:bg-orange-500 text-white font-bold py-2 px-10 border border-orange-500 rounded cursor-pointer">
           Submit
         </button>
-        <div @click="changeAuthPageState" class="flex justify-center font-[Karla] font-light text-blue-500 cursor-pointer hover:text-blue-950">Have an account?</div>
+        <div @click="changeAppScreenState('login')"
+             class="flex justify-center font-[Karla] font-light text-blue-500 cursor-pointer hover:text-blue-950">Create
+          an account?
+        </div>
       </div>
     </div>
   </div>

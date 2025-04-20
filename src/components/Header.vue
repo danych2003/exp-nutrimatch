@@ -1,18 +1,20 @@
 <script setup lang="ts">
-  import router from "@/router/Router.ts";
 
-  interface HeaderProps {
-    pageInfo: {
-      page: string
-    },
-  }
+import {getCookie} from "@/utils/LoginHelper.ts";
+import router, {changeAppScreenState} from "@/router/Router.ts";
 
-  const headerProps = defineProps<HeaderProps>()
+function logout(): void {
+  deleteCookie("token");
+  changeAppToLogin()
+}
 
-  function changeAppScreenState(page: string) {
-    router.push(`/${page}`);
-  }
+function changeAppToLogin() {
+  router.replace("/login");
+}
 
+function deleteCookie(cname: string) {
+  document.cookie = `${cname}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+}
 </script>
 
 <template>
@@ -38,6 +40,10 @@
       <li @click="changeAppScreenState('profile')" class="flex gap-3 hover:text-black cursor-pointer">
         <img src="../assets/icons/profile-icon.svg" alt="icon">
         Profile
+      </li>
+      <li @click="logout" class="flex gap-3 hover:text-black cursor-pointer">
+        <img src="../assets/icons/logout.svg" alt="icon">
+        Logout
       </li>
     </ul>
   </div>

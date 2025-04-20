@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import {reactive, watch} from "vue";
+import {onMounted, reactive, watch} from "vue";
 import {useRoute, useRouter} from "vue-router";
+import router, {changeAppScreenState} from "@/router/Router.ts";
+import {getCookie, isLoggedIn} from "@/utils/LoginHelper.ts";
 
 const route = useRoute()
 const pageInfo = reactive({
   page: "products",
 });
-
 
 watch(
     () => route.path,
