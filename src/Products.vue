@@ -8,7 +8,6 @@ import ProductList from "@/components/ProductList.vue";
 import type {ProductFull} from "@/model/ProductFull.ts";
 import type {ViewProduct} from "@/model/ViewProduct.ts";
 import ProductPopup from "@/components/ProductPopup.vue";
-import router from "@/router/Router.ts";
 import {getCookie} from "@/utils/LoginHelper.ts";
 
 const productPopupState = reactive({
@@ -35,10 +34,6 @@ const productsFull = ref<ProductFull[]>([]);
 const products = ref<ViewProduct[]>([]);
 
 const availablePageNumber = ref(0)
-
-const LoginStatusProp = reactive({
-  token: "",
-});
 
 const filters = reactive({
   sortBy: '',

@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import {helpers, minLength, required} from "@vuelidate/validators";
 import useVuelidate from "@vuelidate/core";
-import {reactive, type Reactive, ref} from "vue";
+import {reactive, ref} from "vue";
 import axios from "axios";
-import {parseError} from "@/utils/ErrorMapper.ts";
 import type {ErrorResponse} from "@/model/ErrorResponse.ts";
-import router, {changeAppScreenState} from "@/router/Router.ts";
+import {changeAppScreenState} from "@/router/Router.ts";
 import HeaderUnauthorized from "@/components/HeaderUnauthorized.vue";
 import {isLoggedIn} from "@/utils/LoginHelper.ts";
 

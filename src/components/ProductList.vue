@@ -90,7 +90,7 @@ function setCurrentPage(page: number) {
       </div>
     </div>
 
-    <div class="space-y-2">
+    <div class="space-y-2" v-auto-animate>
       <Product
           @click="setId(product.id)"
           v-for="product in productListProps.products"
@@ -100,7 +100,7 @@ function setCurrentPage(page: number) {
     </div>
   </div>
   <div class="py-5 flex justify-center">
-    <ul class="flex gap-4">
+    <ul class="flex gap-4" v-auto-animate>
       <li v-for="page in getPageRange(filters.currentPage, productListProps.availablePageNumber)"
           :key="page"
           :class="['cursor-pointer', page === filters.currentPage ? 'font-bold' : '']"
