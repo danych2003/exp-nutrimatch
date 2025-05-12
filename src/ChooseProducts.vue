@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {onMounted, provide, reactive, ref, watch} from "vue";
+import {onMounted, reactive, ref, watch} from "vue";
 import {getProductView} from "@/utils/ProductMapper.ts";
 import axios from "axios";
 
@@ -9,8 +9,13 @@ import type {ProductFull} from "@/model/ProductFull.ts";
 import type {ViewProduct} from "@/model/ViewProduct.ts";
 import ProductPopup from "@/components/ProductPopup.vue";
 import {getCookie} from "@/utils/LoginHelper.ts";
+import { provide } from 'vue'
+import router from "@/router/Router.ts";
+import {useRoute} from "vue-router";
+import {recipe, useRecipeStore} from "@/stores/RecipeCreateStore.ts";
+import {storeToRefs} from "pinia";
 
-const productPopupState = reactive({
+const productState = reactive({
   product: {
     productId: "",
   }
@@ -18,28 +23,38 @@ const productPopupState = reactive({
 
 const product = ref<ProductFull>();
 
-const popupStateProp = ref(false);
-
-function handlePopupEvent() {
-  popupStateProp.value = !popupStateProp.value;
-
-  product.value = productsFull.value.find(
-      product => product.id === Number(productPopupState.product.productId)
-  )
-}
-
-watch(productPopupState, handlePopupEvent)
 const productsFull = ref<ProductFull[]>([]);
 
 const products = ref<ViewProduct[]>([]);
 
 const availablePageNumber = ref(0)
 
+const route = useRoute();
+
 const filters = reactive({
   sortBy: '',
   searchQuery: '',
   currentPage: 1,
 })
+
+watch(productState, handleClickEvent)
+
+const popupStateProp = ref(false);
+
+function handleClickEvent() {
+  popupStateProp.value = !popupStateProp.value;
+  const recipeStore = useRecipeStore();
+
+  product.value = productsFull.value.find(
+      product => product.id === Number(productState.product.productId)
+  )
+
+  recipeStore.addProduct(Number(productState.product.productId), 100);
+
+  router.push({
+    path: '/recipes/create',
+  });
+}
 
 const fetchItems = async () => {
   const token = getCookie("token");
@@ -78,22 +93,17 @@ onMounted(fetchItems);
 
 watch(filters, fetchItems)
 
-provide('type', 'list')
+provide('type', 'choose')
 
 </script>
 
 <template>
-  <ProductPopup
-      v-if="popupStateProp"
-      :product-popup-state="productPopupState"
-      :product="product!"
-  />
   <div class="w-9/10 bg-white m-auto rounded-3xl shadow-2xl mt-5">
     <Header/>
     <ProductList
         :products="products"
         :filters="filters"
-        :productPopupState="productPopupState"
+        :productPopupState="productState"
         :availablePageNumber="availablePageNumber"
     />
   </div>

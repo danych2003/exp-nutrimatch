@@ -1,13 +1,10 @@
 <script setup lang="ts">
 
 
-import ProductList from "@/components/ProductList.vue";
 import Header from "@/components/Header.vue";
-import ProductPopup from "@/components/ProductPopup.vue";
 import {extractUserNameFromJwt, getCookie} from "@/utils/LoginHelper.ts";
 import axios from "axios";
-import {ref, onMounted, watch} from "vue";
-import {getUserFromJson} from "@/utils/UserMapper.ts";
+import {onMounted, ref} from "vue";
 import type {User} from "@/model/User.ts";
 import avatarImage from '@/assets/icons/unknown_avatar.jpg'
 
@@ -27,9 +24,41 @@ const handleFileUpload = (event: Event) => {
 
   const reader = new FileReader()
   reader.onload = () => {
-    imageBase64.value = reader.result as string
-    imagePreview.value = reader.result as string
+    const img = new Image()
+    img.onload = () => {
+      const canvas = document.createElement('canvas')
+      const maxWidth = 700
+      const maxHeight = 700
+
+      let width = img.width
+      let height = img.height
+
+      if (width > height) {
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width
+          width = maxWidth
+        }
+      } else {
+        if (height > maxHeight) {
+          width = (width * maxHeight) / height
+          height = maxHeight
+        }
+      }
+
+      canvas.width = width
+      canvas.height = height
+      const ctx = canvas.getContext('2d')
+      if (!ctx) return
+
+      ctx.drawImage(img, 0, 0, width, height)
+
+      const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.3)
+      imageBase64.value = compressedDataUrl
+      imagePreview.value = compressedDataUrl
+    }
+    img.src = reader.result as string
   }
+
   reader.readAsDataURL(file)
 }
 
@@ -48,7 +77,7 @@ const saveImage = async () => {
     const response = await axios.put(
         `http://localhost:8443/api/user/avatar/${username}`,
         imageBase64.value,
-        { headers }
+        {headers}
     );
 
     user.value = response.data;
@@ -78,46 +107,59 @@ onMounted(getUser);
 <template>
   <div class="w-9/10 bg-white m-auto rounded-3xl shadow-2xl mt-5">
     <Header/>
-    <div class="flex pl-30 p-10 gap-12">
-      <div>
-        <img class="w-50 р-50 rounded-2xl" :src="user?.avatarBase64 || avatarUrl" alt="avatar" />
+    <div class="flex flex-col md:flex-row gap-10 items-start mt-6 p-5">
+      <div class="flex flex-col items-center w-full md:w-1/3">
+        <img
+            class="w-48 h-48 object-cover rounded-2xl border shadow"
+            :src="user?.avatarBase64 || avatarUrl"
+            alt="avatar"
+        />
 
-        <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="file_input">Upload file</label>
+        <label
+            for="file_input"
+            class="mt-6 block text-sm font-medium text-gray-700"
+        >
+          Upload new avatar
+        </label>
+
         <input
-            class="pl-1 font-[Karla] block w-full text-sm border rounded-lg cursor-pointer bg-blue-500 text-white outline-none border-gray-600 dark:placeholder-gray-400"
+            class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50"
             id="file_input"
             type="file"
             @change="handleFileUpload"
             accept="image/*"
         />
 
-        <div class="flex pt-2">
-          <p class="mt-1 text-sm text-blue">SVG, PNG, JPG or GIF (MAX. 800x400px).</p>
-          <button
-              type="button"
-              @click="saveImage"
-              class="ml-2 px-3 py-2 text-xs font-medium text-center inline-flex items-center text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:ring-4 focus:outline-none cursor-pointer"
-          >
-            Upload
-          </button>
-        </div>
+        <button
+            @click="saveImage"
+            class="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition cursor-pointer">
+          Upload
+        </button>
       </div>
-      <div class="flex flex-col gap-y-1 font-[Karla] font-bold">
-        <div v-if="user" class="flex">
-          Username:
-          <p class="pl-1 font-light">{{ user.username }}</p>
-        </div>
-        <div v-if="user?.firstName" class="flex">
-          Firstname:
-          <p class="pl-1 font-light">{{user?.firstName}}</p>
-        </div>
-        <div v-if="user?.lastName" class="flex">
-          Lastname:
-          <p class="pl-1 font-light">{{user?.firstName}}</p>
-        </div>
-        <div v-if="user?.email" class="flex">
-          Email:
-          <p class="pl-1 font-light">{{user?.email}}</p>
+
+      <div class="w-full md:w-2/3 font-[Karla] space-y-4">
+        <div class="text-xl font-bold text-gray-800 mb-2">Profile Information</div>
+
+        <div v-if="user" class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-700">
+          <div>
+            <span class="font-semibold">Username:</span>
+            <p class="text-gray-600">{{ user.username }}</p>
+          </div>
+
+          <div v-if="user.firstName">
+            <span class="font-semibold">First name:</span>
+            <p class="text-gray-600">{{ user.firstName }}</p>
+          </div>
+
+          <div v-if="user.lastName">
+            <span class="font-semibold">Last name:</span>
+            <p class="text-gray-600">{{ user.lastName }}</p>
+          </div>
+
+          <div v-if="user.email">
+            <span class="font-semibold">Email:</span>
+            <p class="text-gray-600">{{ user.email }}</p>
+          </div>
         </div>
       </div>
     </div>

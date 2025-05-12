@@ -7,7 +7,7 @@ export function parse(json: string): ProductFull {
     return product;
 }
 
-export function getProductView(product: ProductFull): ViewProduct {
+export function getAllergens(product: ProductFull) {
     let name = "None";
 
     const fishKeyWords = ['fish', 'kala'];
@@ -33,7 +33,19 @@ export function getProductView(product: ProductFull): ViewProduct {
     if(product.elements.find(element => element.name === "Sugars")) {
         allergens.push('sugars')
     }
+    return allergens;
+}
 
+export function getProductView(product: ProductFull): ViewProduct {
+    let name = "None";
+
+    const allergens = getAllergens(product);
+
+    for (const productName of product.productNames) {
+        if(productName.language == 'EN') {
+            name = productName.name;
+        }
+    }
 
 
     return {

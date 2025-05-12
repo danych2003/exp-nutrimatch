@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { provide, ref } from "vue";
+
 interface Product {
   name: string
   type: string
@@ -7,6 +9,9 @@ interface Product {
 }
 
 const props = defineProps<Product>()
+
+const type = ref('');
+provide('type', type);
 
 </script>
 

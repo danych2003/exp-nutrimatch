@@ -103,7 +103,7 @@ function setCurrentPage(page: number) {
     <ul class="flex gap-4" v-auto-animate>
       <li v-for="page in getPageRange(filters.currentPage, productListProps.availablePageNumber)"
           :key="page"
-          :class="['cursor-pointer', page === filters.currentPage ? 'font-bold' : '']"
+          :class="['cursor-pointer select-none', page === filters.currentPage ? 'font-bold' : '']"
           @click="setCurrentPage(page)">
         {{ page }}
       </li>

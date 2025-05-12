@@ -27,34 +27,41 @@ import Recipe from "@/components/Recipe.vue";
           </div>
       </div>
 
-      <div class="grid grid-cols-5 gap-10 column-gap">
+      <div class="flex flex-wrap gap-5">
         <Recipe
             :name="'Tika masala'"
             :img="'../src/assets/icons/recipes/tika.jpg'"
+            :callories="200"
         />
         <Recipe
             :name="'Bolognese'"
             :img="'../src/assets/icons/recipes/bolognese.jpg'"
+            :callories="1500"
         />
         <Recipe
             :name="'Bolognese'"
             :img="'../src/assets/icons/recipes/bolognese.jpg'"
+            :callories="1500"
         />
         <Recipe
             :name="'Bolognese'"
             :img="'../src/assets/icons/recipes/bolognese.jpg'"
+            :callories="2500"
         />
         <Recipe
             :name="'Bolognese'"
             :img="'../src/assets/icons/recipes/bolognese.jpg'"
+            :callories="7500"
         />
         <Recipe
             :name="'Tika masala'"
             :img="'../src/assets/icons/recipes/tika.jpg'"
+            :callories="1500"
         />
         <Recipe
             :name="'Tika masala'"
             :img="'../src/assets/icons/recipes/tika.jpg'"
+            :callories="2500"
         />
       </div>
 
