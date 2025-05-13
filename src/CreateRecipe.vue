@@ -175,7 +175,7 @@ onMounted(async () => {
         />
         <div v-if="imagePreview || imageBase64" class="mt-4">
           <img
-              :src="imagePreview || imageBase64"
+              :src="imagePreview || imageBase64 || undefined"
                alt="Preview"
                class="w-45 h-auto rounded-xl border" />
         </div>
