@@ -4,7 +4,6 @@ import {ref} from "vue";
 interface Recipe {
   name: string,
   img: string,
-  allergens: string[],
   callories: number,
 }
 

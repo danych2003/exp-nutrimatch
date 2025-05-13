@@ -12,7 +12,7 @@ import {getCookie} from "@/utils/LoginHelper.ts";
 import { provide } from 'vue'
 import router from "@/router/Router.ts";
 import {useRoute} from "vue-router";
-import {recipe, useRecipeStore} from "@/stores/RecipeCreateStore.ts";
+import {useRecipeStore} from "@/stores/RecipeCreateStore.ts";
 import {storeToRefs} from "pinia";
 
 const productState = reactive({
