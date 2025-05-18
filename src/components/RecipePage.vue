@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import {ref} from "vue";
 
-interface Recipe {
+interface RecipePage {
   name: string,
   img: string,
   callories: number,
 }
 
-const props = defineProps<Recipe>()
+const props = defineProps<RecipePage>()
 </script>
 
 <template>

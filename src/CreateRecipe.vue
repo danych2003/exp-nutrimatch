@@ -19,7 +19,6 @@ const productsFull = ref<ProductFull[]>([]);
 const recipeStore = useRecipeStore();
 
 const quantities = ref<Record<number, number>>({})
-const units = ref<Record<number, string>>({})
 
 const route = useRoute();
 
@@ -69,11 +68,20 @@ const handleFileUpload = (event: Event) => {
 }
 
 const saveRecipe = async () => {
-  if (!title.value || !description.value || !imagePreview.value) {
+  if (!title.value || !description.value || !(imagePreview.value || imageBase64.value)) {
     console.error("Please fill in all fields and upload an image.");
     return;
   }
+
   const productRecipes: ProductRecipe[] = [];
+
+  Object.keys(quantities.value).forEach((productId) => {
+    productRecipes.push({
+      productId: parseInt(productId),
+      quantity: quantities.value[parseInt(productId)],
+      unit: 'gram',
+    })
+  })
 
   const token = getCookie("token");
   const recipe: Recipe = {
@@ -148,7 +156,7 @@ const fetchProducts = async () => {
 
 const getProductName = (names: ProductFull['productNames']) => {
   const name = names.find(n => n.language === 'et') || names[0]
-  return name?.name || 'Без названия'
+  return name?.name || 'No name'
 }
 
 onMounted(async () => {
@@ -156,7 +164,6 @@ onMounted(async () => {
     await fetchProducts();
   }
 });
-
 
 </script>
 

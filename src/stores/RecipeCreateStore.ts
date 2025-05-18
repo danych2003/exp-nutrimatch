@@ -24,5 +24,8 @@ export const useRecipeStore = defineStore('recipe', {
         getProductIds() {
             return Object.keys(this.products).map(id => Number(id))
         },
+        getProductRecipes() {
+            return this.products;
+        },
     },
 })

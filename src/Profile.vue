@@ -7,6 +7,7 @@ import axios from "axios";
 import {onMounted, ref} from "vue";
 import type {User} from "@/model/User.ts";
 import avatarImage from '@/assets/icons/unknown_avatar.jpg'
+import router from "@/router/Router.ts";
 
 const user = ref<User | null>(null)
 const error = ref(null)
@@ -96,8 +97,13 @@ const getUser = async () => {
   const response = await axios.get(`http://localhost:8443/api/user/${username}`, {
     headers,
   });
-  console.log(response);
   user.value = response.data;
+}
+
+async function redirectToRecipes() {
+  await router.push({
+    path: '/recipes/create'
+  })
 }
 
 onMounted(getUser);
@@ -162,6 +168,13 @@ onMounted(getUser);
           </div>
         </div>
       </div>
+      <button
+          @click="redirectToRecipes()"
+          type="button"
+          class="text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2.5 text-center me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 cursor-pointer"
+      >
+        Create Recipe
+      </button>
     </div>
   </div>
 </template>
