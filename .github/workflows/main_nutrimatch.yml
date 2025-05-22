@@ -64,5 +64,5 @@ jobs:
         with:
           app-name: 'nutrimatch'
           slot-name: 'Production'
-          package: release.zip
+          package: .
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_207A80567A2A42E79F31D786A5E6B5EA }}
