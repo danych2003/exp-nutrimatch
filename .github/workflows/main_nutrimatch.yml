@@ -54,7 +54,7 @@ jobs:
           name: vue-app
 
       - name: Unzip artifact for deployment
-        run: zip release.zip
+        run: unzip release.zip
 
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
