@@ -39,7 +39,7 @@ const fetchItems = async () => {
       Authorization: `Bearer ${token}`,
     };
 
-    const response = await axios.get(`http://localhost:8443/api/recipes`,
+    const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/recipes`,
         {
           params,
           headers,
@@ -78,7 +78,7 @@ const fetchProducts = async (recipe: Recipe) => {
       ids: recipe.products.map(product => product.productId).join(',')
     }
 
-    const response = await axios.get(`http://localhost:8443/api/products`,
+    const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/products`,
         {
           params,
           headers,

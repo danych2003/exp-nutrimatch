@@ -96,7 +96,7 @@ const saveRecipe = async () => {
     Authorization: `Bearer ${token}`,
   };
   try {
-    await axios.post('http://localhost:8443/api/recipe', recipe, { headers })
+    await axios.post('${import.meta.env.VITE_BACKEND_URL}/api/recipe', recipe, { headers })
         .then(() => router.push('/recipes'));
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
@@ -141,7 +141,7 @@ const fetchProducts = async () => {
       ids: recipeStore.getProductIds().join(',')
     }
 
-    const response = await axios.get(`http://localhost:8443/api/products`,
+    const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/products`,
         {
           params,
           headers,

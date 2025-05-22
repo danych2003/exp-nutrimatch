@@ -33,7 +33,7 @@ const fetchProducts = async () => {
       ids: props.recipe.products.map(product => product.productId).join(',')
     }
 
-    const response = await axios.get(`http://localhost:8443/api/products`,
+    const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/products`,
         {
           params,
           headers,

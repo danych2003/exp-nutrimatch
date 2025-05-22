@@ -67,7 +67,7 @@ const fetchItems = async () => {
       Authorization: `Bearer ${token}`,
     };
 
-    const response = await axios.get(`http://localhost:8443/api/product`,
+    const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/product`,
         {
           params,
           headers,

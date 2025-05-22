@@ -8,6 +8,7 @@ import {onMounted, ref} from "vue";
 import type {User} from "@/model/User.ts";
 import avatarImage from '@/assets/icons/unknown_avatar.jpg'
 import router from "@/router/Router.ts";
+import * as process from "node:process";
 
 const user = ref<User | null>(null)
 const error = ref(null)
@@ -76,7 +77,7 @@ const saveImage = async () => {
     };
 
     const response = await axios.put(
-        `http://localhost:8443/api/user/avatar/${username}`,
+        `${process.env.VITE_BACKEND_URL}/api/user/avatar/${username}`,
         imageBase64.value,
         {headers}
     );
@@ -94,7 +95,7 @@ const getUser = async () => {
     Authorization: `Bearer ${token}`,
   };
 
-  const response = await axios.get(`http://localhost:8443/api/user/${username}`, {
+  const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/user/${username}`, {
     headers,
   });
   user.value = response.data;

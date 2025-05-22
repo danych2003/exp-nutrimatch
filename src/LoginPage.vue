@@ -67,7 +67,7 @@ const login = async () => {
   };
 
   try {
-    const response = await axios.post(`http://localhost:8443/api/login`, data);
+    const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/login`, data);
     return {success: true, data: response.data};
   } catch (error: any) {
     console.log(error);

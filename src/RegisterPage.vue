@@ -90,7 +90,7 @@ const register = async () => {
     data.firstName = form.registrationForm.firstName;
   }
   try {
-    const response = await axios.post(`http://localhost:8443/api/register`, data);
+    const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/register`, data);
     return { success: true, data: response.data };
   } catch (error: any) {
     return {
