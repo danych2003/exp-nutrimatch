@@ -6,7 +6,7 @@ import {extractUserNameFromJwt, getCookie} from "@/utils/LoginHelper.ts";
 import axios from "axios";
 import {onMounted, ref} from "vue";
 import type {User} from "@/model/User.ts";
-import avatarImage from '@/assets/icons/unknown_avatar.jpg'
+import avatarImage from '/icons/unknown_avatar.jpg'
 import router from "@/router/Router.ts";
 import * as process from "node:process";
 
@@ -66,7 +66,6 @@ const handleFileUpload = (event: Event) => {
 
 const saveImage = async () => {
   if (imageBase64.value) {
-    console.log('Base64 Image:', imageBase64.value);
 
     const token = getCookie("token");
     const username = extractUserNameFromJwt(token);
