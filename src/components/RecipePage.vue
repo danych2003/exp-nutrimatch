@@ -31,7 +31,7 @@ function handleClick() {
         <span class="text-slate-400 font-[Karla]">Allergens</span>
         <ul class="flex items-center gap-2">
           <li v-for="(allergen, index) in allergens" :key="index">
-            <img :src="`/src/assets/icons/${allergen}.svg`" alt="icon"/>
+            <img :src="`/icons/${allergen}.svg`" alt="icon"/>
           </li>
         </ul>
       </div>
