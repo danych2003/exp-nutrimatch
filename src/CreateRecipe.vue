@@ -96,7 +96,7 @@ const saveRecipe = async () => {
     Authorization: `Bearer ${token}`,
   };
   try {
-    await axios.post('${import.meta.env.VITE_BACKEND_URL}/api/recipe', recipe, { headers })
+    await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/recipe`, recipe, { headers })
         .then(() => router.push('/recipes'));
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
@@ -155,7 +155,7 @@ const fetchProducts = async () => {
 
 
 const getProductName = (names: ProductFull['productNames']) => {
-  const name = names.find(n => n.language === 'et') || names[0]
+  const name = names.find(n => n.language === 'en') || names[0]
   return name?.name || 'No name'
 }
 
