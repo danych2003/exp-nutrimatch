@@ -34,9 +34,9 @@ function handleClick() {
             <img :src="`/icons/${allergen}.svg`" alt="icon"/>
           </li>
         </ul>
+        </div>
       </div>
     </div>
-  </div>
 </template>
 
 <style scoped>

@@ -2,7 +2,7 @@
 
 import type {Recipe} from "@/model/Recipe.ts";
 import type {ProductFull} from "@/model/ProductFull.ts";
-import {getCookie} from "@/utils/LoginHelper.ts";
+import {extractUserNameFromJwt, getCookie} from "@/utils/LoginHelper.ts";
 import axios from "axios";
 import {onMounted, ref, watch} from "vue";
 import type {ProductRecipe} from "@/model/ProductRecipe.ts";
@@ -11,8 +11,14 @@ interface RecipePopup {
   recipe: Recipe
   calories: number
 }
-
 const props = defineProps<RecipePopup>()
+
+const isRecipeCreator = (recipeUsername: string) => {
+  const token = getCookie("token");
+  if (!token) return false;
+  const username = extractUserNameFromJwt(token)
+  return username === recipeUsername || username === "admin";
+}
 
 const productsProp = ref<ProductFull[]>()
 
@@ -20,6 +26,29 @@ const emit = defineEmits(['popupCloseEvent'])
 
 function closePopup() {
   emit('popupCloseEvent', 'closed')
+}
+
+const deleteRecipe = async (recipeTitle: string) => {
+  const token = getCookie("token");
+  try {
+    const headers = {
+      Authorization: `Bearer ${token}`,
+    };
+
+    const params = {
+      name: recipeTitle
+    };
+
+    const response = await axios.delete(`${import.meta.env.VITE_BACKEND_URL}/api/recipe`,
+        {
+          params,
+          headers,
+        });
+    alert("deleted successfully.");
+  } catch (e) {
+    console.error(e);
+  }
+  closePopup();
 }
 
 const fetchProducts = async () => {
@@ -95,11 +124,20 @@ fetchProducts()
           </div>
         </div>
 
+
         <div class="text-right font-medium">
           🔥 Calories:
-            {{ props.calories }}
+          {{ props.calories }}
         </div>
 
+        <button
+            type="button"
+            class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
+            v-if="isRecipeCreator(props.recipe.username)"
+            @click="deleteRecipe(props.recipe.title)"
+        >
+          Delete
+        </button>
       </div>
     </div>
   </div>
